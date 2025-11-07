@@ -10,7 +10,7 @@ def main():
     IP = 'localhost'
     PORT = 4711
 
-    sock = socket.socket(socket.AF_INET,socket.sock_DGRAM) # Socket aufsetzen
+    sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Socket aufsetzen
     sock.settimeout(3)
 
     while number_rtt < 11:
@@ -44,7 +44,8 @@ def main():
         sec_num = sec_num + 1
     
     rttimes.sort()
-    print("Median der RTT's: {rttimes[len(rttimes)//2]}")
+    median = rttimes[len(rttimes)//2]
+    print(f"Median der RTT's: {median}")
 
     sock.close()
     pass

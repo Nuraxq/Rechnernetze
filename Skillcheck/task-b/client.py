@@ -15,7 +15,7 @@ def main():
     with open("temps.data",'rt') as file:
         for line in file:
             time, temp = line.split(' ')
-            time = (time)
+            time = int(time)
             temp = float(temp)
         
             if time - last_time >= 5000:
