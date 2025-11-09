@@ -12,7 +12,10 @@ def main():
 
     with open("data.data","rb") as file:
         data = file.read(1024)
-    
+        length = len(data)
+        sendable = struct.pack("!cih",b"D",sequence_number,length)
+        sendable += data
+
 
 
 
