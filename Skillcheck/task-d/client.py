@@ -44,7 +44,10 @@ def main():
             data = file.read(1024)
 
 
+    finalize = struct.pack("!c",b"F")
+    sock.sendto(finalize, (IP,PORT))
 
+    sock.close()
     pass
 
 
