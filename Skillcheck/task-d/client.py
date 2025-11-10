@@ -3,7 +3,7 @@ import socket, struct, time
 def main():
     IP = 'localhost'
     PORT = 4711
-    sequence_number = 1
+    sequence_number = 0
     sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     sock.settimeout(1)
 
@@ -28,8 +28,7 @@ def main():
                 
                         response_char, response_seq = struct.unpack("!ci",response)
 
-                        print(response_seq, sequence_number)
-                        if(response_seq == sequence_number):
+                        if(response_seq == sequence_number and response_char == b'A'):
                             print(f"Got successfull answer on try {tries} for Chunk: {sequence_number}")
                             tries = 11 # Versuche 
                         else:  
@@ -49,8 +48,8 @@ def main():
     finalize = struct.pack("!c",b"F")
     sock.sendto(finalize, (IP,PORT))
     endtime = time.time()
-    ms_time = (start-endtime) * 1000
-    print("Finalized 20/20 packets in {ms_time}ms time!")
+    ms_time = (endtime-start) * 1000
+    print(f"Finalized 20/20 packets in {ms_time} ms time!")
     sock.close()
     pass
 
