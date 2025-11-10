@@ -19,14 +19,16 @@ def main():
             while tries < 10:
                 sock.sendto(sendable,(IP,PORT))
                 try:
+                    print("----------------------------")
                     print(f"Sending Chunk {sequence_number} to: {IP} {PORT}")
                     print(f"Currently on try:{tries} ")
+                    print("-----------------------------")
                     response, nadress = sock.recvfrom(1024)
                     if len(response) == 5:
                 
                         response_char, response_seq = struct.unpack("!ci",response)
                     
-                        if(response_char == "A" and response_seq == sequence_number):
+                        if(response_seq == sequence_number and response_char == b'A'):
                             print(f" Got successfull answer on try {tries} for Chunk: {sequence_number}")
                             tries = 10 # Versuche 
                         else:  
