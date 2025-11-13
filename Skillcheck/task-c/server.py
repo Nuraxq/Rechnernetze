@@ -11,6 +11,7 @@ def main():
         while True:
             data = nsock.recv(1024)
             if not data: 
+                nsock.close()
                 break
             if len(data) == 9:
                 com,num = struct.unpack("!cd",data)
