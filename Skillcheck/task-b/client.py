@@ -4,7 +4,7 @@ def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((IP,PORT))
     last_time = 0
-    with open("temps.data") as file:
+    with open("temps.data","rt") as file:
         for line in file:
             time,temp = int(line.split(' ')[0]),float(line.split(' ')[1])
             if(time-last_time >= 5000):
