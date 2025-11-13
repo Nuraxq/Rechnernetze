@@ -1,58 +1,38 @@
-import socket, struct, time 
-
+import socket,struct,time
 def main():
-    IP = 'localhost'
-    PORT = 4711
-    sequence_number = 0
+    IP,PORT = 'localhost', 4711
     sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     sock.settimeout(1)
-
+    start = time.time()
     with open("data.data","rb") as file:
-        #TODO: schleife bis datei leer ist
         data = file.read(1024)
-        start = time.time()
+        seq = 0
         while data:
-            length = len(data)
-            sendable = struct.pack("!cih",b"D",sequence_number,length)
-            sendable += data
             tries = 1
+            length = len(data)
             while tries < 11:
-                sock.sendto(sendable,(IP,PORT))
+                package = struct.pack("!cih",b"D",seq,length) + data
+                sock.sendto(package,(IP,PORT))
                 try:
-                    print("----------------------------")
-                    print(f"Sending Chunk {sequence_number} to: {IP} {PORT}")
-                    print(f"Currently on try:{tries} ")
-                    
-                    response, nadress = sock.recvfrom(1024)
-                    if len(response) == 5:
-                
-                        response_char, response_seq = struct.unpack("!ci",response)
-
-                        if(response_seq == sequence_number and response_char == b'A'):
-                            print(f"Got successfull answer on try {tries} for Chunk: {sequence_number}")
-                            tries = 11 # Versuche 
-                        else:  
-                            print(f"Response to Chunk {sequence_number} on try {tries} was unsuccessful, retransmitting")
-                            tries = tries +1
+                    ans,adr = sock.recvfrom(1024)
+                    ansC ,ansSeq = struct.unpack("!ci",ans)
+                    if(ansC == b'A' and ansSeq == seq):
+                        print(f"[ACK]: Seq={seq} (attempt {tries}/10)")
+                        seq = seq +1 # Seq Number erhöhen
+                        tries = 11 # Schleife skippen
                     else:
-                        print(f"Response to Chunk {sequence_number} on try {tries} was unsuccessful, retransmitting")
-                        tries = tries +1
-
+                        print(f"Unexpected Answer: Seq={seq} (attempt {tries})")
                 except socket.timeout:
-                    print(f"Response to Chunk {sequence_number} on try {tries} was unsuccessful, timer fail, retransmitting")
-                    tries = tries +1
-
-            sequence_number = sequence_number +1
+                    print(f"[TIMEOUT] Seq={seq} (attempt {tries}/10)")
+                tries = tries+1
             data = file.read(1024)
-    
-    finalize = struct.pack("!c",b"F")
-    sock.sendto(finalize, (IP,PORT))
-    endtime = time.time()
-    ms_time = (endtime-start) * 1000
-    print(f"Finalized 20/20 packets in {ms_time} ms time!")
+
+    total_time = (time.time() - start) * 1000
+    finalize = struct.pack("!c",b'F')
+    sock.sendto(finalize,(IP,PORT))
+    print(f"Finalized {seq}/{seq} packets in {total_time} ms")
     sock.close()
     pass
-
 
 if __name__ == "__main__":
     main()
