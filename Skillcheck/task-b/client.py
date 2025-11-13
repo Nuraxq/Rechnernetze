@@ -1,32 +1,15 @@
-import socket
-import struct
-
+import struct, socket
 def main():
-    
-    sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    IP = 'localhost'
-    PORT = 4711
-
+    IP, PORT = 'localhost', 4711
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((IP,PORT))
-
-    last_time = 0    
-    byteString = b''
-
-    with open("temps.data",'rt') as file:
+    last_time = 0
+    with open("temps.data") as file:
         for line in file:
-            time, temp = line.split(' ')
-            time = int(time)
-            temp = float(temp)
-        
-            if time - last_time >= 5000:
-                byteString += struct.pack("!qf",time,temp)
+            time,temp = int(line.split(' ')[0]),float(line.split(' ')[1])
+            if(time-last_time >= 5000):
+                sock.sendall(struct.pack("!qf",time,temp))
                 last_time = time
-             
-        sock.sendall(byteString)
-    
     sock.close()
-    pass
-
-
 if __name__ == "__main__":
     main()
