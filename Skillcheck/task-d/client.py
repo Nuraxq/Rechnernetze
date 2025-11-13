@@ -26,7 +26,6 @@ def main():
                     print(f"[TIMEOUT] Seq={seq} (attempt {tries}/10)")
                 tries = tries+1
             data = file.read(1024)
-
     total_time = (time.time() - start) * 1000
     finalize = struct.pack("!c",b'F')
     sock.sendto(finalize,(IP,PORT))
