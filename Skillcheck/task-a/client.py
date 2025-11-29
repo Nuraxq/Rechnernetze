@@ -1,56 +1,35 @@
-import socket 
-import struct
-import time
+import struct,socket,time
 
 def main():
 
-    sec_num = 0 #Seq nummer die wir mitgeben
-    number_rtt = 0 # RTT's mitzählen
-    rttimes = [] 
     IP = 'localhost'
     PORT = 4711
-
-    sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Socket aufsetzen
+    sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     sock.settimeout(3)
+    samples, seq = [],0
 
-    while number_rtt < 11:
-        data = struct.pack("!4si",b'PING',sec_num)
-        try: 
-
-            first = time.time() # Zeit messen
-
-            sock.sendto(data,(IP,PORT)) # Daten verschicken
-
-            answer, nadress  = sock.recvfrom(1024) # PONG erwarten
-
-            second = time.time() # Zeit stoppen
-
-            timediff = (second-first) * 1000 # Zeit in MS
-
-            ansString, ansSeq = struct.unpack("4si",answer[0:8])
-
-            if str(ansString,'utf-8') == "PONG":
-                print(f"Seq {sec_num}: RTT ist {timediff}")
-
-                rttimes.append(timediff)
-                number_rtt = number_rtt +1
-
+    while len(samples) < 11:
+        data = struct.pack("!4si",b"PING",seq_num)
+        start = time.time()
+        sock.sendto(data,(IP,PORT))
+        try:
+            ndata, naddress = sock.recvfrom(1024)
+            rtt = (time.time() - start) * 1000
+            answerS, answerSeq = struct.unpack("!4si",ndata)            
+            if(answerSeq == seq_num and answerS == b'PONG'):
+                print(f"Packet {seq_num} had a RTT of: {rtt} ms")
+                samples.append(rtt)
             else:
-                print("Message doesnt begin with PONG")
-
+                print("Wrong message Recieved")
         except socket.timeout:
-            print(f"Message {sec_num} was lost")
-                
-        sec_num = sec_num + 1
-    
-    rttimes.sort()
-    median = rttimes[len(rttimes)//2]
-    print(f"Median der RTT's: {median}")
-
+            print(f"Packet {seq_num} had a timeout")
+        seq_num = seq_num +1
+        
+    samples.sort()
+    median = samples[5]
+    print(f"Median over 11 RTT's is: {median}")
     sock.close()
     pass
-
-
 
 if __name__ == "__main__":
     main()
