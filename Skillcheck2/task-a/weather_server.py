@@ -8,15 +8,11 @@ from database import Database
 def get_avg(values):
     return sum(values)/len(values)
 
-    # Wir versuchen einfach Iterativ die Informationen zu verarbeiten: 
-    # While true loop -> Iterativ UDP  
-
 def main(ip,port):
     database = Database()
     sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     sock.bind((ip,port))
     arguments = ["temperatures","humidities","wind_speeds"]
-
     while(True):
         data, nadress = sock.recvfrom(1024)
         uid,seq,temp,hum,wind = struct.unpack("!HIfff",data)
@@ -35,10 +31,6 @@ def main(ip,port):
         else:
             response = struct.pack("!HI",uid,database.getData(uid,"last_sequence_number")+1)
             sock.sendto(response,nadress)
-
-
-    # ------- Start cour code here ------- #
-    # ...
     sock.close()
 
 if __name__ == "__main__":
