@@ -99,14 +99,12 @@ def treat_request(connectionfd):
     first_response = struct.pack("!I",filesize) + data
     connectionfd.sendall(first_response)
 
-    # --> Soll das hier so??? 
-    # Wenn wir das verschicken ist es doch sowieso ein Bytes objekt, wieso 
-    # sollten wir Bytes -> String -> Bytes kodieren. Unnötig. 
-
-    #with open(f"tickets/{name}","rb") as file:
-    #   connectionfd.sendall(file.read())
-    second_response = struct.pack(f"!{fdatasize}s",filedata)
-    connectionfd.sendall(second_response)
+    # Eine der beiden Versionen klappen
+    with open(f"tickets/{name}","rb") as file:
+       connectionfd.sendall(file.read())
+    
+    #second_response = struct.pack(f"!{fdatasize}s",filedata)
+    #connectionfd.sendall(second_response)
 
 if __name__ == "__main__":
     main()
