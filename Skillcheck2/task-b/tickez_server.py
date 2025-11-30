@@ -59,6 +59,43 @@ def main():
     # --------- Start your Code here ----------- #
     # ...
 
+    # Listen FD erstellen, der die Requests annimmt. 
+    listenfd = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    listenfd.bind(('localhost',args.port))
+    listenfd.listen(5)
+
+    for i in range (0,4):
+        pid = os.fork()
+        if pid == 0:
+            print(f"I am Child: {pid}")
+            recv_request(listenfd)
+
+def recv_request(lsock):
+    while True:
+        connectionfd , cadress = lsock.accept()
+        treat_request(connectionfd)
+        connectionfd.close()
+    sys.exit()
+        
+def treat_request(connectionfd):
+    data = connectionfd.recv(1024)
+    namelen = struct.unpack("!H",data[:2])[0]
+    name = data[2:2+namelen].decode("utf-8")
+    path = f"tickets/{name}"
+    
+    filesize = os.path.getsize(path)
+    filedata = parse_ticket_as_utf8EncodedString(path)
+    fdatasize = len(filedata)
+
+    first_response = struct.pack("!I",filesize) + data
+    connectionfd.sendall(first_response)
+
+    # --> Soll das hier so??? 
+    # Wenn wir das verschicken ist es doch sowieso ein Bytes objekt, wieso 
+    # sollten wir Bytes -> String -> Bytes kodieren. Unnötig. 
+    
+    second_response = struct.pack(f"!{fdatasize}s",filedata)
+    connectionfd.sendall(second_response)
 
 if __name__ == "__main__":
     main()
