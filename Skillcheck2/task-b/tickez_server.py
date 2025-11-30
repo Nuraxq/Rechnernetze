@@ -61,14 +61,20 @@ def main():
 
     # Listen FD erstellen, der die Requests annimmt. 
     listenfd = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    listenfd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     listenfd.bind(('localhost',args.port))
     listenfd.listen(5)
+    
 
     for i in range (0,4):
         pid = os.fork()
         if pid == 0:
-            print(f"I am Child: {pid}")
+            id = os.getpid()
+            print(f"I am Child: {id}")
             recv_request(listenfd)
+    
+    while True:
+        time.sleep(1)
 
 def recv_request(lsock):
     while True:
