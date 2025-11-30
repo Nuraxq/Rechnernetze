@@ -46,6 +46,8 @@ def main():
                     char = struct.unpack("!c",data)[0]
                     if char == b'G':
                         sock.sendall(struct.pack("!d",totals[adress]))
+                    elif char == b'R':
+                        totals[adress] = 0
     for sock in socketlist:
         sock.close()
     server.close()
