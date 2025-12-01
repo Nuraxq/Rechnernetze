@@ -17,10 +17,14 @@ def main(ip,port):
         data, nadress = sock.recvfrom(1024)
         uid,seq,temp,hum,wind = struct.unpack("!HIfff",data)
 
-        if not uid in database.get_present_uids:
+        if not uid in database.get_present_uids():
             database.add_new_uid(uid)
+
+        if seq == 0:
+            database.add_data((uid,temp,hum,wind))
+            database.set_last_sequence_number(uid,seq)
         
-        if seq == (database.getData(uid,"last_sequence_number") +1):
+        elif seq == (database.getData(uid,"last_sequence_number") +1):
             database.add_data((uid,temp,hum,wind))
             database.set_last_sequence_number(uid,seq)
             averages = []
