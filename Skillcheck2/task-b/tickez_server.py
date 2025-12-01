@@ -92,11 +92,13 @@ def treat_request(connectionfd):
     name = data[2:2+namelen].decode("utf-8")
     path = f"tickets/{name}"
     
+    #Erste Antwort
     filesize = os.path.getsize(path)
     first_response = struct.pack("!I",filesize) + data
     connectionfd.sendall(first_response)
 
     # Eine der beiden Versionen klappen
+    #Zweite Antwort
     with open(f"tickets/{name}","rb") as file:
        connectionfd.sendall(file.read())
     
