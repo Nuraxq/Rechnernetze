@@ -93,9 +93,6 @@ def treat_request(connectionfd):
     path = f"tickets/{name}"
     
     filesize = os.path.getsize(path)
-    filedata = parse_ticket_as_utf8EncodedString(path)
-    fdatasize = len(filedata)
-
     first_response = struct.pack("!I",filesize) + data
     connectionfd.sendall(first_response)
 
@@ -103,6 +100,9 @@ def treat_request(connectionfd):
     with open(f"tickets/{name}","rb") as file:
        connectionfd.sendall(file.read())
     
+    
+    #filedata = parse_ticket_as_utf8EncodedString(path)
+    #fdatasize = len(filedata)
     #second_response = struct.pack(f"!{fdatasize}s",filedata)
     #connectionfd.sendall(second_response)
 
