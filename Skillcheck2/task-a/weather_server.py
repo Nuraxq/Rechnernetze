@@ -21,12 +21,14 @@ def main(ip,port):
         if not uid in database.get_present_uids():
             database.add_new_uid(uid)
         
-        last_seq = database.getData(uid,"last_sequence_number")
+        
 
         # First Packet initalising
         if seq == 0:
             database.add_data((uid,temp,hum,wind))
             database.set_last_sequence_number(uid,seq)
+            
+        last_seq = database.getData(uid,"last_sequence_number") 
         
         # A Package we expect
         elif seq <= last_seq +1:
