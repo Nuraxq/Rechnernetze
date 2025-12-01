@@ -57,7 +57,7 @@ def isValid(payload, lrc_byte):
     
     if not byteParity(lrc_byte):
         return False
-        
+    # Only use lower 7 bits of LRC byte    
     if lrc(payload) != (lrc_byte & 0b0111_1111) :
         print("hier")
         return False
