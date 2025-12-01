@@ -24,7 +24,7 @@ def main(ip,port):
             database.add_data((uid,temp,hum,wind))
             database.set_last_sequence_number(uid,seq)
         
-        elif seq == (database.getData(uid,"last_sequence_number") +1):
+        elif seq <= (database.getData(uid,"last_sequence_number") +1):
             database.add_data((uid,temp,hum,wind))
             database.set_last_sequence_number(uid,seq)
             averages = []
@@ -32,9 +32,10 @@ def main(ip,port):
                 averages.append(get_avg(database.getData(uid,arg)))
             print(f"Averages for client {uid}: {averages[0]}C | {averages[1]}% | {averages[2]}km/h")
 
-        else:
-            response = struct.pack("!HI",uid,database.getData(uid,"last_sequence_number")+1)
-            sock.sendto(response,nadress)
+        elif seq > (database.getData(uid,"last_sequence_number") +1:
+            for i in range(database.getData(uid,"last_sequence_number"),seq)
+                response = struct.pack("!HI",uid,i)
+                sock.sendto(response,nadress)
     sock.close()
 
 if __name__ == "__main__":
