@@ -54,7 +54,11 @@ def isValid(payload, lrc_byte):
     for byte in payload:
         if not byteParity(byte):
             return False
-    if lrc(payload) != lrc_byte:
+    
+    if not byteParity(lrc_byte):
+        return False
+        
+    if lrc(payload) != (lrc_byte & 0b0111_1111) :
         print("hier")
         return False
     return True
