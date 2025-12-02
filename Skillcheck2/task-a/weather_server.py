@@ -24,14 +24,13 @@ def main(ip,port):
         
 
         # First Packet initalising
-        if seq == 0:
+        if database.getData(uid,"last_sequence_number") is None:
             database.add_data((uid,temp,hum,wind))
             database.set_last_sequence_number(uid,seq)
             
-        last_seq = database.getData(uid,"last_sequence_number") 
-        
         # A Package we expect
         elif seq <= last_seq +1:
+            last_seq = database.getData(uid,"last_sequence_number") 
             #Add Data
             database.add_data((uid,temp,hum,wind))
             if seq == last_seq +1:
@@ -46,7 +45,7 @@ def main(ip,port):
         #Packages were Skipped 
         elif seq > (database.getData(uid,"last_sequence_number") +1):
             #Resend all lost Packages 
-            for i in range(database.getData(uid,"last_sequence_number"),seq)
+            for i in range(database.getData(uid,"last_sequence_number")+1,seq):
                 response = struct.pack("!HI",uid,i)
                 sock.sendto(response,nadress)
     sock.close()
