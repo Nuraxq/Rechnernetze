@@ -36,7 +36,7 @@ def main(ip,port):
         # Accept package
         last_seq = database.getData(uid,"last_sequence_number") 
         #Add Data
-        database.add_data((uid,temp,hum,wind))
+        database.add_data(uid,temp,hum,wind)
         if seq >= last_seq +1:
             database.set_last_sequence_number(uid,seq)
             
