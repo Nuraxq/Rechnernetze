@@ -50,8 +50,7 @@ def main():
                         totals[adress] = 0
     for sock in socketlist:
         sock.close()
-    server.close()
-
+   
 
 
             
