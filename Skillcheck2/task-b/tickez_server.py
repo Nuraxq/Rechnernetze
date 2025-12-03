@@ -85,8 +85,6 @@ def recv_request(lsock):
         
 #Requests werden behandelt 
 def treat_request(connectionfd):
-
-    
     data = connectionfd.recv(1024)
     namelen = struct.unpack("!H",data[:2])[0]
     name = data[2:2+namelen].decode("utf-8")
@@ -96,17 +94,10 @@ def treat_request(connectionfd):
     filesize = os.path.getsize(path)
     first_response = struct.pack("!I",filesize) + data
     connectionfd.sendall(first_response)
-
-    # Eine der beiden Versionen klappen
+    
     #Zweite Antwort
     with open(f"tickets/{name}","rb") as file:
        connectionfd.sendall(file.read())
-    
-    
-    #filedata = parse_ticket_as_utf8EncodedString(path)
-    #fdatasize = len(filedata)
-    #second_response = struct.pack(f"!{fdatasize}s",filedata)
-    #connectionfd.sendall(second_response)
 
 if __name__ == "__main__":
     main()
