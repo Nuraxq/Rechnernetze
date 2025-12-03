@@ -55,7 +55,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     try:
         main(args.ip, args.port)
-    except:
-        pass
     finally:
         pass
