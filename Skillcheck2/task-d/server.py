@@ -64,7 +64,7 @@ def isValid(payload, lrc_byte):
     return True
 
 def byteParity(data: int):
-    return data.bits_count() % 2 == 0
+    return data.bit_count() % 2 == 0
 
 def lrc(data: bytes):
     lrc = 0
