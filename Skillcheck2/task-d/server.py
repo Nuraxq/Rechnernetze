@@ -9,7 +9,7 @@ def main():
     while True:
         print("New Session started!")
 
-        with open("recieved.txt","w") as file:
+        with open("recieved.txt","a") as file:
             current_client = None
             while True:
 
