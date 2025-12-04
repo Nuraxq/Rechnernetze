@@ -13,6 +13,8 @@ def main():
             current_client = None
             while True:
 
+
+# SESSION STATE BESSER HANDLEB
                 data, adress = server.recvfrom(1024)
                 
                 #Set client
