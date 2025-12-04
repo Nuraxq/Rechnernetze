@@ -1,4 +1,4 @@
-import socket, struct
+ import socket, struct
 
 def main():
 
@@ -20,6 +20,7 @@ def main():
                 #Set client
                 if current_client is None:
                     current_client = adress
+                    # STATE RESER
 
                 #Skip wrong client
                 if current_client != adress:
