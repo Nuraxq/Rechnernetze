@@ -38,7 +38,7 @@ def main():
                         
                         #We only use lower 7 bits
                         text = ""
-                        for zeichen in data:
+                        for zeichen in payload:
                             text += chr(zeichen & 0b0111_1111)
 
                         if isValid(payload,lrc_byte):
