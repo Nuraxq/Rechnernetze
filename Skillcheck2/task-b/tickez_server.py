@@ -56,48 +56,32 @@ def main():
         sys.exit(-1)
     print(f"Port: {args.port}, Dirpath: {args.dirpath}")
     
+    server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    server.bind(('localhost',args.port))
+    server.listen(5)
 
-    # Listen FD erstellen, der die Requests annimmt. 
-    listenfd = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    listenfd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    listenfd.bind(('localhost',args.port))
-    listenfd.listen(5)
-    
-    #Preforken
-    for i in range (0,4):
+    for i in range(0,4):
         pid = os.fork()
         if pid == 0:
             id = os.getpid()
-            print(f"I am Child: {id}")
-            recv_request(listenfd)
-    
-    #Parent Process schläft
-    while True:
-        time.sleep(1)
+            print(f"Child Process: {id}")
+            handle_requests(server)
 
-#Requests werden angenommen 
-def recv_request(lsock):
+def handle_requests(server):
     while True:
-        connectionfd , cadress = lsock.accept()
-        treat_request(connectionfd)
-        connectionfd.close()
-    sys.exit()
+        nsockfd, nadress = server.accept()
+        data = nsockfd.recv(1024)
+        namelen = struct.unpack("!H",data[:2])[0]
+        name = data[2:2+namelen].decode("utf-8")
+        path = f"tickets/{name}"
+        size = os.path.getsize(path)
         
-#Requests werden behandelt 
-def treat_request(connectionfd):
-    data = connectionfd.recv(1024)
-    namelen = struct.unpack("!H",data[:2])[0]
-    name = data[2:2+namelen].decode("utf-8")
-    path = f"tickets/{name}"
-    
-    #Erste Antwort
-    filesize = os.path.getsize(path)
-    first_response = struct.pack("!I",filesize) + data
-    connectionfd.sendall(first_response)
-    
-    #Zweite Antwort
-    with open(f"tickets/{name}","rb") as file:
-       connectionfd.sendall(file.read())
+        first_response = struct.pack("!I",size) + data
+        nsockfd.sendall(first_response)
+
+        with open(path,"rb") as file:
+            nsockfd.sendall(file.read())
+        nsockfd.close()
 
 if __name__ == "__main__":
     main()
