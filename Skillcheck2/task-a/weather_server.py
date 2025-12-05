@@ -10,42 +10,38 @@ def get_avg(values):
 
 def main(ip,port):
     database = Database()
-    sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-    sock.bind((ip,port))
-    arguments = ["temperatures","humidities","wind_speeds"]
-    while(True):
-        data, nadress = sock.recvfrom(1024)
-        uid,seq,temp,hum,wind = struct.unpack("!HIfff",data)
 
-        #Add User
-        if not uid in database.get_present_uids():
+    server = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+    server.bind((ip,port))
+    arguments = ["temperatures","humidities","wind_speeds"]
+    while True:
+        data, adress = server.recvfrom(1024)
+        uid,seq,temp,hum,wind = struct.unpack("!HIfff",data)
+        
+        if uid not in database.get_present_uids():
             database.add_new_uid(uid)
         
-        # First Packet initalising
         if database.getData(uid,"last_sequence_number") is None:
             database.set_last_sequence_number(uid,seq)
+        
+        last_seq = database.getData(uid,"last_sequence_number")
 
-        #Packages were Skipped 
-        if seq > (database.getData(uid,"last_sequence_number") +1):
-            #Resend all lost Packages 
-            for i in range(database.getData(uid,"last_sequence_number")+1,seq):
-                response = struct.pack("!HI",uid,i)
-                sock.sendto(response,nadress)
-                
-            
-        # Accept package
-        last_seq = database.getData(uid,"last_sequence_number") 
-        #Add Data
+        if seq > last_seq +1:
+            for i in range(last_seq+1,seq):
+                server.sendto((struct.pack("!HI",uid,i)),adress)
+        
         database.add_data(uid,temp,hum,wind)
-        if seq >= last_seq +1:
+        if seq > last_seq:
             database.set_last_sequence_number(uid,seq)
-            
-        #Print Info
+
         averages = []
         for arg in arguments:
             averages.append(get_avg(database.getData(uid,arg)))
-        print(f"Averages for client {uid}: {averages[0]}C | {averages[1]}% | {averages[2]}km/h")       
+        print(f"User: {uid} | Temp: {averages[0]} | Hum: {averages[1]} | Wind: {averages[2]}")
     sock.close()
+
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WeatherStation UDP Server")
@@ -55,5 +51,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     try:
         main(args.ip, args.port)
+    except:
+        pass
     finally:
         pass
