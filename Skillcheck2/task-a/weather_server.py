@@ -38,7 +38,7 @@ def main(ip,port):
         for arg in arguments:
             averages.append(get_avg(database.getData(uid,arg)))
         print(f"User: {uid} | Temp: {averages[0]} | Hum: {averages[1]} | Wind: {averages[2]}")
-    sock.close()
+    server.close()
 
 
 
