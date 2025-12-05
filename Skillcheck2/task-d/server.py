@@ -1,79 +1,67 @@
- import socket, struct
+import struct,socket
 
 def main():
-
+    
     server = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     server.bind(('localhost',4711))
-    print("Server Started")
-    
     while True:
-        print("New Session started!")
+        print("Session started!")
 
-        with open("received.txt","a") as file:
-            current_client = None
+        with open("received.txt","w") as file:
+            
+            curr_client = None
+
             while True:
-
-
-# SESSION STATE BESSER HANDLEB
                 data, adress = server.recvfrom(1024)
-                
-                #Set client
-                if current_client is None:
-                    current_client = adress
-                    # STATE RESER
 
-                #Skip wrong client
-                if current_client != adress:
+                if curr_client is None:
+                    curr_client = adress
+                if curr_client != adress:
                     continue
 
-                #Data Packet
                 if len(data) == 1:
                     if data == b'F':
-                        print("Recieved finalize packet, resetting state")
+                        print("Received F byte, resetting State!")
                         break
                 else:
-                    char, length = struct.unpack("!ch",data[:3])
-
-                    #Check for D, Split data
+                    char, length = struct.unpack("!cH",data[:3])
                     if char == b'D':
-                        payload = data[3:3+length]
-                        lrc_byte = data[3+length]
-                        
-                        #We only use lower 7 bits
+                        payload  = data[3:3+length]
+                        lrc = data[3+length]
+
                         text = ""
-                        for zeichen in payload:
-                            text += chr(zeichen & 0b0111_1111)
+                        for byte in payload:
+                            text += chr((byte & 0b0111_1111))
 
-                        if isValid(payload,lrc_byte):
-                            print(f"Message: {text} | Error: No")
+                        if isValid(data[3:]):
                             file.write(text)
-                            server.sendto(b"A",(current_client))
+                            print(f"Text: {text} | Error: No")
+                            server.sendto(b'A',curr_client)
                         else:
-                            print(f"Message: {text} | Error: Yes") 
-                            server.sendto(b"E",(current_client))
+                            print(f"Text: {text} | Error: Yes")
+                            server.sendto(b'E',curr_client)
+    server.close()
+    pass
 
-        
-def isValid(payload, lrc_byte):
-    for byte in payload:
-        if not byteParity(byte):
-            return False
+def isValid(package: bytes):
+    payload = package[:-1]
+    lrc_byte = package[-1]
     
-    if not byteParity(lrc_byte):
-        return False
-    # Only use lower 7 bits of LRC byte    
-    if lrc(payload) != (lrc_byte & 0b0111_1111) :
-        print("hier")
-        return False
-    return True
-
-def byteParity(data: int):
+    for byte in package:
+        if not checkParity(byte):
+            return False
+    return lrc(payload,lrc_byte)
+        
+def checkParity(data: bytes):
     return data.bit_count() % 2 == 0
 
-def lrc(data: bytes):
+def lrc(data: bytes, lrc_byte):
     lrc = 0
     for byte in data:
         lrc ^= (byte & 0b0111_1111)
-    return lrc
+    return lrc == (lrc_byte & 0b0111_1111)
+
+
 
 if __name__ == "__main__":
     main()
