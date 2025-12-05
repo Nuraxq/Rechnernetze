@@ -1,21 +1,19 @@
 import struct,socket
 
 def main():
-    
     server = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     server.bind(('localhost',4711))
     while True:
         print("Session started!")
-
-        with open("received.txt","w") as file:
-            
+        with open("received.txt","a") as file:
             curr_client = None
-
             while True:
                 data, adress = server.recvfrom(1024)
 
                 if curr_client is None:
                     curr_client = adress
+                    file.truncate(0)
+
                 if curr_client != adress:
                     continue
 
@@ -46,22 +44,16 @@ def main():
 def isValid(package: bytes):
     payload = package[:-1]
     lrc_byte = package[-1]
-    
     for byte in package:
-        if not checkParity(byte):
+        if byte.bit_count() % 2 == 1:
             return False
     return lrc(payload,lrc_byte)
-        
-def checkParity(data: bytes):
-    return data.bit_count() % 2 == 0
 
 def lrc(data: bytes, lrc_byte):
     lrc = 0
     for byte in data:
         lrc ^= (byte & 0b0111_1111)
     return lrc == (lrc_byte & 0b0111_1111)
-
-
 
 if __name__ == "__main__":
     main()
